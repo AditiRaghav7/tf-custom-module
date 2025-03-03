@@ -1,27 +1,16 @@
+# Define variables required for the module
 
-
-locals {
-  #To format the subnet IDs which may be multiples in format of subnet_name = {id=, az=}
-  public_subnet_output = {
-    for key, config in local.public_subnet : key => {
-      subnet_id = aws_subnet.main[key].id
-      az        = aws_subnet.main[key].availability_zone
-    }
-  }
-
-  private_subnet_output = {
-    for key, config in local.private_subnet : key => {
-      subnet_id = aws_subnet.main[key].id
-      az        = aws_subnet.main[key].availability_zone
-    }
-  }
+variable "vpc_id" {
+  description = "VPC ID where subnets will be created"
+  type        = string
 }
 
-#Subnets Details
-output "public_subnets" {
-  value = local.public_subnet_output
+variable "public_subnets" {
+  description = "List of public subnet CIDR blocks"
+  type        = list(string)
 }
 
-output "private_subnets" {
-  value = local.private_subnet_output
+variable "private_subnets" {
+  description = "List of private subnet CIDR blocks"
+  type        = list(string)
 }
