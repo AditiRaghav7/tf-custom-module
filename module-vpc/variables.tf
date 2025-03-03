@@ -1,26 +1,30 @@
-variable "vpc_config" {
-  description = "To get the CIDR and Name of VPC from user"
-  type = object({
-    cidr_block = string
-    name       = string
-  })
-  validation {
-    condition     = can(cidrnetmask(var.vpc_config.cidr_block))
-    error_message = "Invalid CIDR Format - ${var.vpc_config.cidr_block}"
+#VPC
+output "vpc_id" {
+  value = aws_vpc.main.id
+}
+
+locals {
+  #To format the subnet IDs which may be multiples in format of subnet_name = {id=, az=}
+  public_subnet_output = {
+    for key, config in local.public_subnet : key => {
+      subnet_id = aws_subnet.main[key].id
+      az        = aws_subnet.main[key].availability_zone
+    }
+  }
+
+  private_subnet_output = {
+    for key, config in local.private_subnet : key => {
+      subnet_id = aws_subnet.main[key].id
+      az        = aws_subnet.main[key].availability_zone
+    }
   }
 }
 
-variable "subnet_config" {
-  # sub1={cidr=.. az=..} sub2={} sub3={}
-  description = "Get the CIDR and AZ for the subnets"
-  type = map(object({
-    cidr_block = string
-    az         = string
-    public     = optional(bool, false)
-  }))
-  validation {
-    # sub1={cidr=} sub2={cidr=..}, [true, true, false]
-    condition     = alltrue([for config in var.subnet_config : can(cidrnetmask(config.cidr_block))])
-    error_message = "Invalid CIDR Format"
-  }
+#Subnets Details
+output "public_subnets" {
+  value = local.public_subnet_output
+}
+
+output "private_subnets" {
+  value = local.private_subnet_output
 }
